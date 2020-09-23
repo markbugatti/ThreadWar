@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ThreadWar.Interfaces;
+using ThreadWar.Helpers;
+using System.ComponentModel;
 
 namespace ThreadWar
 {
@@ -15,22 +17,46 @@ namespace ThreadWar
         Right,
         Upward,
         Downward,
-        Neutral
+        SelfDefined,
     }
-    class Enemy : IPositioned, IMovable
+    class Enemy : IPositioned, IMovable, IDrawable
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int X { get; set; } = 0;
+        public int Y { get; set; } = 0;
+        public static int Width { get;} = 9;
+        public static int Height { get; } = 8;
         public Direction Direction { get; set; }
-        public int Speed { get; set; }
-
-        public void move()
+        public int Speed { get; set; } = 4;
+        
+        public void clear()
         {
-
+            ConsoleHelper.clearArea(X, Y, Width, Height);
         }
         public void move(Direction direction)
         {
-            throw new NotImplementedException();
+            clear();
+            if (X + Speed + Width < Console.WindowWidth - 1)
+                X += Speed;
+            else
+                X += Console.WindowWidth - X - Width;
+            draw();
         }
+
+        public void draw()
+        {
+            ConsoleHelper.drawLines(
+                new string[] {
+                " +-----+",
+                " | X X |",
+                " +  _ +",
+                "  +---+",
+                "+-+   +-+",
+                "+ |   | +",
+                "  | + |",
+                "  +-+-+",
+                }, X, Y, Width, Height
+            );
+        }
+
     }
 }

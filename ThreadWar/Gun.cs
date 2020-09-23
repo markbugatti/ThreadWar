@@ -12,46 +12,31 @@ using ThreadWar.Interfaces;
 
 namespace ThreadWar
 {
-    class Gun : IPositioned, IMovable/*, IDrawable*/
+    class Gun : IPositioned, IMovable, IDrawable
     {
         public int X { get; set; }
         public int Y { get; set; }
         public int Width { get; set; } = 6;
         public int Height { get; set; } = 9;
+        // how fast they move
         public int Speed { get; set; } = 4;
-        //public ushort Speed { get; set; }
-        private bool drawn = false;
 
         [Description("Method to fire a new bullet")]
         public void fire()
         {
         
-        }
-        public Gun() {}
-        
+        }      
         public Gun(int x, int y)
         {
-            X = x;
-            Y = y;
-            draw(Direction.Neutral);
+            X = x-Width;
+            Y = y-Height;
+            draw();
         }
         public void move(Direction direction)
         {
-            throw new NotImplementedException();
-        }
-        
-        public void draw(Direction direction)
-        {
-            if (!drawn) {
-                Y -= 9;
-                X -= 3;
-            }
-            else { 
-                clear();
-            }
-            // here you can specify speed X += ...  X -= ...
+            clear();
             switch (direction)
-            { 
+            {
                 case Direction.Left:
                     if (X - Speed > 0)
                         X -= Speed;
@@ -60,35 +45,32 @@ namespace ThreadWar
                     break;
                 case Direction.Right:
 
-                        if (X + Speed + Width < Console.WindowWidth - 1)
-                            X += Speed;
-                        else
-                            X += Console.WindowWidth - X - Width;
+                    if (X + Speed + Width < Console.WindowWidth - 1)
+                        X += Speed;
+                    else
+                        X += Console.WindowWidth - X - Width;
                     break;
                 default:
                     break;
             }
-            Console.SetCursorPosition(X, Y);
-            Console.Write("+----+");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|" );
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X, ++Y);
-            Console.Write("|----|");
-            Console.SetCursorPosition(X + 3, Y);
-            ++Y;
-            drawn = true;
+            draw();
+        }
+        
+        public void draw()
+        {
+            ConsoleHelper.drawLines(
+                new string[] {
+                "+----+",
+                "|----|",
+                "|----|",
+                "|----|",
+                "|----|",
+                "|----|",
+                "|----|",
+                "|----|",
+                "|----|",
+                }, X, Y, Width, Height
+            );
         }
 
         public void clear()
