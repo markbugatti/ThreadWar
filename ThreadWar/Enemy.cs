@@ -25,7 +25,7 @@ namespace ThreadWar
         public int Y { get; set; } = 0;
         public static int Width { get;} = 9;
         public static int Height { get; } = 8;
-        public Direction Direction { get; set; }
+        //public Direction Direction { get; set; }
         public int Speed { get; set; } = 4;
         
         public void clear()
@@ -42,13 +42,20 @@ namespace ThreadWar
             draw();
         }
 
+        public bool canMove()
+        {
+            if (X + Width > Console.WindowWidth - 1)
+                return false;
+            return true;
+        }
+
         public void draw()
         {
             ConsoleHelper.drawLines(
                 new string[] {
                 " +-----+",
                 " | X X |",
-                " +  _ +",
+                " +  _  +",
                 "  +---+",
                 "+-+   +-+",
                 "+ |   | +",

@@ -30,7 +30,7 @@ namespace ThreadWar
              * создать поток таймера и поток нажиманий клавиши.
              * ждать ответ о завершениии одного из них. Как только ответ получен, прекратить исполнение потоков и вызвать в главном потоке игру
              * Попробовать реализовать ожидание перед игрой не через while и IAsyncResult, а через AutoResetEvent ст. 706
-            */
+             */
 
             // thread for timer
             BeginGameEventHandler timerEventHandler = new BeginGameEventHandler(startOnTimer);
@@ -88,10 +88,13 @@ namespace ThreadWar
              */
             EnemyFactory enemyFactory = new EnemyFactory();
             Thread enemyThread = new Thread(new ThreadStart(enemyFactory.start));
-            enemyThread.Name = "Enemy thread";
+            enemyThread.Name = "Enemy main thread";
             enemyThread.Start();
-            
 
+            BulletFactory bulletFactory = new BulletFactory();
+            Thread bulletThread = new Thread(new ThreadStart(bulletFactory.start));
+            bulletThread.Name = "Bullet main thread";
+            bulletThread.Start();
             while (true)
             {
                 Direction direction = Direction.SelfDefined;
@@ -100,19 +103,17 @@ namespace ThreadWar
                 {
                     case ConsoleKey.LeftArrow:
                         direction = Direction.Left;
-                        changed = true;
+                        gun.move(direction);
                         break;
                     case ConsoleKey.RightArrow:
                         direction = Direction.Right;
-                        changed = true;
+                        gun.move(direction);
+                        break;
+                    case ConsoleKey.Spacebar:
+                        bulletFactory.addBullet(gun.X, gun.Y);
                         break;
                     default:
                         break;
-                }
-
-                if (changed)
-                {
-                    gun.move(direction);
                 }
             }
         }
