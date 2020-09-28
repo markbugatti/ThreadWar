@@ -21,7 +21,7 @@ namespace ThreadWar.Helpers
         static extern IntPtr GetStdHandle(int num);
 
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)] //   ̲┌───────────────────^
+        [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool ReadConsoleOutputCharacterW(
             IntPtr hStdout,   // result of 'GetStdHandle(-11)'
             out Char ch,      // U̲n̲i̲c̲o̲d̲e̲ character result
@@ -30,7 +30,6 @@ namespace ThreadWar.Helpers
             out uint c_out);  // (unwanted, discard)
         
         #endregion
-
 
         private static object threadLock = new object();
         // безопасный к потокам clearArea
@@ -54,50 +53,65 @@ namespace ThreadWar.Helpers
                 {
                     Console.SetCursorPosition(x, y++);
                     Console.Write(line);
-
-
                 }
             }
         }
 
-        internal static bool areaBusy(Type type)
+        internal static bool areaBusy(object obj)
         {
             lock(threadLock)
             {            
                 int height = 0, width = 0;
-                bool typeExist = false;
-                if(type == typeof(Enemy))
+                if(obj is Enemy)
                 {
                     height = Enemy.Height;
                     width = Enemy.Width;
-                    typeExist = true;
-                }
-
-                if (typeExist) {
-                    var stdout = GetStdHandle(-11);
-                    uint coord;
+                    
                     for (uint i = 0; i < height; i++)
                     {   
                         for (uint j = 0; j < width; j++)
                         {
-                            coord = j;
-                            coord |= i << 16;
-                            if (!ReadConsoleOutputCharacterW(
-                               stdout,
-                               out char ch,    // result: single ANSI char
-                               1,                  // # of chars to read
-                               coord,              // (X,Y) screen location to read (see above)
-                               out _))             // result: actual # of chars (unwanted)
-                                throw new Win32Exception();
-                            
-                            if (ch != ' ') 
+                            if(getChar(i, j) != ' ')
                                 return true;
                         }
                     }
                 }
+                if(obj is Bullet bullet)
+                {
+                    
+                    height = Bullet.Height;
+                    width = Bullet.Width;
+                    uint startI = (uint)bullet.Y;
+                    // проверить с логикой высоты и шага 
+                    for (uint i = startI; i > startI - height; i--)
+                    {
+                        for (uint j = (uint)bullet.X; j < width; j++)
+                        {
+                            if(getChar(i, j) != ' ')
+                                return true;
+                        }
+                    }
+
+                }
                 return false;
             }
         }
+
+        private static char getChar(uint i, uint j)
+        {
+            var stdout = GetStdHandle(-11);
+            uint coord;
+            coord = j;
+            coord |= i << 16;
+            if (!ReadConsoleOutputCharacterW(
+               stdout,
+               out char ch,    // result: single ANSI char
+               1,                  // # of chars to read
+               coord,              // (X,Y) screen location to read (see above)
+               out _))             // result: actual # of chars (unwanted)
+                throw new Win32Exception();
+            return ch;
+        } 
 
     }
 }

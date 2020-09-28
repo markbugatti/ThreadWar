@@ -25,7 +25,7 @@ namespace ThreadWar
         public int Y { get; set; } = 0;
         public static int Width { get;} = 9;
         public static int Height { get; } = 8;
-        //public Direction Direction { get; set; }
+        public event Action<Enemy> OutOfField;
         public int Speed { get; set; } = 4;
         
         public void clear()
@@ -34,12 +34,20 @@ namespace ThreadWar
         }
         public void move(Direction direction)
         {
-            clear();
-            if (X + Speed + Width < Console.WindowWidth - 1)
-                X += Speed;
+            if (canMove())
+            {
+                clear();
+                if (X + Speed + Width < Console.WindowWidth - 1)
+                    X += Speed;
+                else
+                    X += Console.WindowWidth - X - Width;
+                draw();
+            }
             else
-                X += Console.WindowWidth - X - Width;
-            draw();
+            {
+                clear();
+                OutOfField(this);
+            }
         }
 
         public bool canMove()

@@ -19,9 +19,7 @@ namespace ThreadWar
         public delegate void StartOp();
 
         public delegate bool BeginGameEventHandler();
-        //public delegate bool ConsoleEventHandler();
-        private static bool started = false;
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             //Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
             ConsoleFacade.ShowWindow(WindowMode.MAXIMIZE);
@@ -98,7 +96,6 @@ namespace ThreadWar
             while (true)
             {
                 Direction direction = Direction.SelfDefined;
-                bool changed = false;
                 switch (Console.ReadKey().Key)
                 {
                     case ConsoleKey.LeftArrow:

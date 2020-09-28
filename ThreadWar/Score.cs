@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 
 namespace ThreadWar
 {
     class Score
     {
-        private int hit;
-        private int miss;
-        public int Hit { 
+        private static int hit = 0;
+        private static int miss = 0;
+        public event Action<int> hitHandle;
+        public event Action<int> missHandle;
+        public static int Hit { 
             get => hit;
             set {
                 if (value > hit)
@@ -19,7 +22,7 @@ namespace ThreadWar
                     throw new ArgumentException("New \"hit\" value must be grater then previous");
             } 
         }
-        public int Miss { 
+        public static int Miss { 
             get => miss;
             set {
                 if (value > miss)

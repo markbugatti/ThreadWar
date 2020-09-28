@@ -8,15 +8,19 @@ using System.Threading.Tasks;
 using ThreadWar.Helpers;
 using Timer = System.Threading.Timer;
 using System.Windows.Forms;
+using System.Runtime.CompilerServices;
 
 namespace ThreadWar
 {
     class EnemyFactory
     {
         private List<Enemy> Enemies { get; set; } = new List<Enemy>();
-        private object threadLock = new object();
         private int randVal = 10;
+        private object threadLock = new object();
         private object randValLocker = new object();
+        private object enemyLocker = new object();
+        private static AutoResetEvent waitHandle = new AutoResetEvent(true);
+
         public void start()
         {
             /* create timer to generate enemy and move it
@@ -24,9 +28,11 @@ namespace ThreadWar
             * creat timer for enemy moving. this timer should change its elapsed timer
             */
             // create first enemy without timer
-            
-            Enemies.Add(new Enemy());
-            
+            Enemy enemy = new Enemy();
+            enemy.OutOfField += removeEnemy;
+            Enemies.Add(enemy);
+
+
             // разные таймеры используют один и тот же ресурс Enemies нужно его синхронизировать
             Timer creater = new Timer((obj) =>
             {
@@ -39,7 +45,9 @@ namespace ThreadWar
                         if (i == 0)
                             lock (threadLock)
                             {
-                                Enemies.Add(new Enemy());
+                                enemy = new Enemy();
+                                enemy.OutOfField += removeEnemy;
+                                Enemies.Add(enemy);
                             }
                     }
                 }
@@ -49,6 +57,8 @@ namespace ThreadWar
                 */
             }, false, 0, 1000);
 
+
+
             // this timer changes n value for r.Next(n) function in creator callback. Increase appearance probability every 10 seconds
             Timer changer = new Timer(obj =>
             {
@@ -57,7 +67,6 @@ namespace ThreadWar
                     lock (randValLocker)
                     {
                         randVal--;
-                        //MessageBox.Show($"{randVal}");
                     }
                 }
             }, false, 0, 10000);
@@ -66,19 +75,26 @@ namespace ThreadWar
             {
                 lock (threadLock)
                 {
-                    if(!Enemies.First().canMove())
+                    try
                     {
-                        Enemies.RemoveAt(0);
+                        foreach (var en in Enemies)
+                        {
+                            en.move(Direction.SelfDefined);
+                        }
                     }
-                    foreach (var enemy in Enemies)
+                    catch
                     {
-                            enemy.move(Direction.SelfDefined);
                     }
                 }
             }, null, 0, 500);
-            
-            
-            //enemy.move(Direction.SelfDefined);
+
+
+
+        }
+
+        private void removeEnemy(Enemy enemy)
+        {
+            Enemies.Remove(enemy);
         }
 
         private bool areaBusy()
