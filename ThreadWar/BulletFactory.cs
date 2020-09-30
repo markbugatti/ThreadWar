@@ -10,33 +10,43 @@ namespace ThreadWar
 {
     class BulletFactory
     {
-        List<Bullet> bullets = new List<Bullet>();
+         List<Bullet> bullets = new List<Bullet>();
+        private object threadLocker = new object();
+        private static Mutex mutex = new Mutex();
         public void start()
         {
             // timer for moving the bullets
             Timer timer = new Timer(obj =>
-            {
-                try
-                {
+            {    
+                //lock(threadLocker) {
+                    mutex.WaitOne();
                     foreach (var bullet in bullets)
-                    {
+                    {   
                         bullet.move(Direction.SelfDefined);
-                    }                    
-                }
-                catch
-                {
-                }
+                    }
+                    mutex.ReleaseMutex();
+                //}
             }, null, 0, 200);
         }
 
         public void addBullet(int x, int y)
         {
-
-            if (bullets.Count < 3)
+            lock (threadLocker)
             {
-                Bullet bullet = new Bullet(x, y);
-                bullets.Add(bullet);
-                bullet.OutOfField += bul => bullets.Remove(bul);
+            //mutex.WaitOne();
+                if (bullets.Count < 3)
+                {
+                    Bullet bullet = new Bullet(x, y);
+                    bullet.OutOfField += bul => {
+
+                        var copy = new List<Bullet>(bullets);
+                        copy.Remove(bul);
+                        bullets = copy;
+                        
+                    };
+                    bullets.Add(bullet);
+                }
+            //mutex.ReleaseMutex();
             }
         }
     }

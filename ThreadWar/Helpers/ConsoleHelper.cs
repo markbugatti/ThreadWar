@@ -78,20 +78,21 @@ namespace ThreadWar.Helpers
                 }
                 if(obj is Bullet bullet)
                 {
-                    
                     height = Bullet.Height;
                     width = Bullet.Width;
+                    int speed = Bullet.Speed;
                     uint startI = (uint)bullet.Y;
+                    uint startJ = (uint)bullet.X;
                     // проверить с логикой высоты и шага 
-                    for (uint i = startI; i > startI - height; i--)
-                    {
-                        for (uint j = (uint)bullet.X; j < width; j++)
+                    //for (uint i = startI; i < startI - 1; i--)
+                    //{
+                        for (uint j = startJ; j < startJ + width; j++)
                         {
-                            if(getChar(i, j) != ' ')
-                                return true;
+                            char ch = getChar(startI-1, j);
+                            if (ch != ' ' && ch != '\0')
+                                 return true;
                         }
-                    }
-
+                    //}
                 }
                 return false;
             }

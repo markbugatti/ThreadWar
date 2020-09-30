@@ -44,7 +44,6 @@ namespace ThreadWar
                         X -= X;
                     break;
                 case Direction.Right:
-
                     if (X + Speed + Width < Console.WindowWidth - 1)
                         X += Speed;
                     else

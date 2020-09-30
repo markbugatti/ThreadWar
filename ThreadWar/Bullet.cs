@@ -19,7 +19,7 @@ namespace ThreadWar
         public int Y{ get; set; }
         public static int Width { get; set; } = 4;
         public static int Height { get; set; } = 3;
-        public int Speed { get; set; } = 6;
+        public static int Speed { get; set; } = 6;
         [Description("Create and initialize bullet with coordinates")]
         public bool InMove { get; private set; } = false;
         public Bullet(int X, int Y)
@@ -27,26 +27,29 @@ namespace ThreadWar
             this.X = X;
             this.Y = Y-4;
         }
-
+        private static Mutex mutex = new Mutex();
         public void move(Direction direction)
         {
+            //mutex.WaitOne();
             // коллизия просчитываеться наперед, нужно использовать параметр высоты и скорости
-            bool collision = isCollision();
-            if (canMove() && !collision)
-            {
+            if (isCollision()) {
                 clear();
-                Y -= Speed;
-                draw();
+                Score.Hit++;
+                OutOfField(this);
             }
-            else
-            {
-                clear();
-                if (collision)
-                    Score.Hit++;
+            else {
+                if (canMove())
+                {
+                    clear();
+                    Y -= Speed;
+                    draw();
+                }
                 else
-                    Score.Hit--;
-                    // отнять бал
+                {
+                    clear();
+                    Score.Miss++;
                     OutOfField(this);
+                }
             }
         }
 
@@ -59,7 +62,7 @@ namespace ThreadWar
 
         public bool isCollision()
         {
-            return ConsoleHelper.areaBusy(this);
+            return ConsoleHelper.areaBusy(this);   
         }
         public void draw()
         {

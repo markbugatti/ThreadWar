@@ -2,31 +2,53 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 
 namespace ThreadWar
 {
-    class Score
+    static class Score
     {
         private static int hit = 0;
         private static int miss = 0;
-        public event Action<int> hitHandle;
-        public event Action<int> missHandle;
-        public static int Hit { 
-            get => hit;
+        public static event Action ScoreChangedHandle;
+        private static object hitLocker = new object();
+        private static object missLocker = new object();
+
+        public static int Hit {
+            get
+            {
+                //lock (hitLocker)
+                //{
+                    return hit;
+                //}
+            }
             set {
-                if (value > hit)
-                    hit = value;
-                else
-                    throw new ArgumentException("New \"hit\" value must be grater then previous");
+                //lock (hitLocker)
+                //{
+                    if (value > hit)
+                    {
+                        hit = value;
+                        ScoreChangedHandle();
+                    }
+                    else
+                        throw new ArgumentException("New \"hit\" value must be grater then previous");
+                //}
             } 
         }
-        public static int Miss { 
-            get => miss;
+        public static int Miss {
+            get
+            {
+                //lock()
+                return miss;
+            }
             set {
                 if (value > miss)
-                    hit = value;
+                {
+                    miss = value;
+                    ScoreChangedHandle();
+                }
                 else
                     throw new ArgumentException("New \"miss\" value must be grater then previous");
             } 

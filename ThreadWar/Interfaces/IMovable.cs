@@ -8,7 +8,7 @@ namespace ThreadWar.Interfaces
 {
     interface IMovable
     {
-        int Speed { get; set; }
+        //int Speed { get; set; }
         void move(Direction direction);
     }
 }

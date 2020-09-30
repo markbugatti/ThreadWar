@@ -93,6 +93,14 @@ namespace ThreadWar
             Thread bulletThread = new Thread(new ThreadStart(bulletFactory.start));
             bulletThread.Name = "Bullet main thread";
             bulletThread.Start();
+
+            Score.ScoreChangedHandle += () =>
+            {
+                // change application title to current score;
+                Console.Title = $"hits: {Score.Hit}, misses: {Score.Miss}";
+            };
+            // add handle for score changes
+
             while (true)
             {
                 Direction direction = Direction.SelfDefined;
