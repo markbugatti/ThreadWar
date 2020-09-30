@@ -11,43 +11,52 @@ namespace ThreadWar
     class BulletFactory
     {
          List<Bullet> bullets = new List<Bullet>();
-        private object threadLocker = new object();
-        private static Mutex mutex = new Mutex();
+        private object bulletLocker = new object();
+        public event Action<Bullet> killHandler;
+        //private static Mutex mutex = new Mutex();
         public void start()
         {
             // timer for moving the bullets
             Timer timer = new Timer(obj =>
             {    
-                //lock(threadLocker) {
-                    mutex.WaitOne();
+                lock(bulletLocker) {
+                    //mutex.WaitOne();
                     foreach (var bullet in bullets)
                     {   
                         bullet.move(Direction.SelfDefined);
                     }
-                    mutex.ReleaseMutex();
-                //}
+                    //mutex.ReleaseMutex();
+                }
             }, null, 0, 200);
         }
 
         public void addBullet(int x, int y)
         {
-            lock (threadLocker)
-            {
+            //lock (threadLocker)
+            //{
             //mutex.WaitOne();
+            lock (bulletLocker)
+            {
                 if (bullets.Count < 3)
                 {
                     Bullet bullet = new Bullet(x, y);
                     bullet.OutOfField += bul => {
-
-                        var copy = new List<Bullet>(bullets);
-                        copy.Remove(bul);
-                        bullets = copy;
-                        
+                        var copy1 = new List<Bullet>(bullets);
+                        copy1.Remove(bul);
+                        bullets = copy1;
                     };
-                    bullets.Add(bullet);
+                    bullet.killHandler += bul =>
+                    {
+                        killHandler(bul);
+                    };
+
+                    List<Bullet> copy = new List<Bullet>(bullets);
+                    copy.Add(bullet);
+                    bullets = copy;
                 }
-            //mutex.ReleaseMutex();
             }
+            //mutex.ReleaseMutex();
+            //}
         }
     }
 }

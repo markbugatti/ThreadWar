@@ -34,25 +34,25 @@ namespace ThreadWar
         }
         public void move(Direction direction)
         {
+            clear();
             if (canMove())
             {
-                clear();
-                if (X + Speed + Width < Console.WindowWidth - 1)
+                //if (X + Speed + Width < Console.WindowWidth - 1)
                     X += Speed;
-                else
-                    X += Console.WindowWidth - X - Width;
+                //else
+                    //X += Console.WindowWidth - X - Width;
                 draw();
             }
             else
             {
-                clear();
+                Score.Miss++;
                 OutOfField(this);
             }
         }
 
         public bool canMove()
         {
-            if (X + Width > Console.WindowWidth - 1)
+            if (X + Width + Speed > Console.WindowWidth - 1)
                 return false;
             return true;
         }

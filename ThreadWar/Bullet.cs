@@ -17,22 +17,24 @@ namespace ThreadWar
         public event Action<Bullet> OutOfField;
         public int X { get; set; }
         public int Y{ get; set; }
-        public static int Width { get; set; } = 4;
-        public static int Height { get; set; } = 3;
+        public static int Width { get; private set; } = 4;
+        public static int Height { get; private set; } = 3;
         public static int Speed { get; set; } = 6;
         [Description("Create and initialize bullet with coordinates")]
         public bool InMove { get; private set; } = false;
+        public event Action<Bullet> killHandler;
         public Bullet(int X, int Y)
         {
             this.X = X;
             this.Y = Y-4;
         }
-        private static Mutex mutex = new Mutex();
         public void move(Direction direction)
         {
             //mutex.WaitOne();
             // коллизия просчитываеться наперед, нужно использовать параметр высоты и скорости
             if (isCollision()) {
+                // перебрать всех врагов и посмотреть чьи координаты пересекаються
+                killHandler(this);             
                 clear();
                 Score.Hit++;
                 OutOfField(this);
@@ -47,7 +49,7 @@ namespace ThreadWar
                 else
                 {
                     clear();
-                    Score.Miss++;
+                    //Score.Miss++;
                     OutOfField(this);
                 }
             }

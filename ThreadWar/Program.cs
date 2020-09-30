@@ -90,6 +90,10 @@ namespace ThreadWar
             enemyThread.Start();
 
             BulletFactory bulletFactory = new BulletFactory();
+            bulletFactory.killHandler += bul =>
+            {
+                enemyFactory.killEnemy(bul.X, bul.Y);
+            };
             Thread bulletThread = new Thread(new ThreadStart(bulletFactory.start));
             bulletThread.Name = "Bullet main thread";
             bulletThread.Start();
@@ -100,6 +104,11 @@ namespace ThreadWar
                 Console.Title = $"hits: {Score.Hit}, misses: {Score.Miss}";
             };
             // add handle for score changes
+
+            Score.GameEndHandle += msg =>
+            {
+
+            }
 
             while (true)
             {

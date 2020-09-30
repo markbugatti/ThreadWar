@@ -50,8 +50,6 @@
     <Compile Include="ConsoleFacade.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnemyFactory.cs" />
-    <Compile Include="Game.cs" />
-    <Compile Include="GameField.cs" />
     <Compile Include="Gun.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />

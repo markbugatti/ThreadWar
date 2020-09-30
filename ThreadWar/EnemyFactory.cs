@@ -16,9 +16,8 @@ namespace ThreadWar
     {
         private List<Enemy> Enemies { get; set; } = new List<Enemy>();
         private int randVal = 10;
-        private object threadLock = new object();
+        private object enemiesLocker = new object();
         private object randValLocker = new object();
-        private object enemyLocker = new object();
         private static AutoResetEvent waitHandle = new AutoResetEvent(true);
 
         public void start()
@@ -38,24 +37,24 @@ namespace ThreadWar
             {
                 lock (randValLocker)
                 {
-                    if (!areaBusy())
-                    {
-                        Random r = new Random();
-                        int i = r.Next(randVal);
-                        if (i == 0)
-                            lock (threadLock)
+                        if (!areaBusy())
+                        {
+                            Random r = new Random();
+                            int i = r.Next(randVal);
+                            if (i == 0)
+                            lock (enemiesLocker)
                             {
                                 enemy = new Enemy();
                                 enemy.OutOfField += removeEnemy;
                                 Enemies.Add(enemy);
                             }
-                    }
+                        }
                 }
                 /* Увеличить вероятность появления противника через функцию r.Next(n) чем больше n, тем вероятность меньше и наоборот
                 * Сделать таймер, который через каждый промежуток времени, например 15 сек, будет уменьшать значение n, тем самым увеличивать шанс появления нового противника.
                 * в целевой делегат (в этот) будет входить каждый раз новый параметр (int)obj, который будет давать новое значение n;
                 */
-            }, false, 0, 1000);
+            }, false, 100, 1000);
 
 
 
@@ -73,17 +72,11 @@ namespace ThreadWar
 
             Timer mover = new Timer((obj) =>
             {
-                lock (threadLock)
+                lock (enemiesLocker)
                 {
-                    try
+                    foreach (var en in Enemies)
                     {
-                        foreach (var en in Enemies)
-                        {
-                            en.move(Direction.SelfDefined);
-                        }
-                    }
-                    catch
-                    {
+                        en.move(Direction.SelfDefined);
                     }
                 }
             }, null, 0, 500);
@@ -92,9 +85,27 @@ namespace ThreadWar
 
         }
 
+        // x and y represent bullet position
+        public void killEnemy(int bulletX, int bulletY)
+        {
+            lock(enemiesLocker)
+            {
+                foreach (var en in Enemies)
+                {
+                    if(bulletX+Bullet.Width > en.X)
+                    {
+                        removeEnemy(en);
+                        break;
+                    }
+                }
+            }
+        }
         private void removeEnemy(Enemy enemy)
         {
-            Enemies.Remove(enemy);
+            enemy.clear();
+            var copy = new List<Enemy>(Enemies);
+            copy.Remove(enemy);
+            Enemies = copy;
         }
 
         private bool areaBusy()
