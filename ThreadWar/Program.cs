@@ -11,14 +11,15 @@ using Timer = System.Timers.Timer;
 using ThreadWar.Interfaces;
 using System.IO;
 using System.Windows.Controls.Primitives;
+using ThreadWar.Helpers;
 
 namespace ThreadWar
 {
     class Program
     {
-        public delegate void StartOp();
-
-        public delegate bool BeginGameEventHandler();
+        private delegate void StartOp();
+        private delegate bool BeginGameEventHandler();
+        private static bool isPlaying = true;
         static void Main(string[] args)
         {
             //Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
@@ -29,6 +30,8 @@ namespace ThreadWar
              * ждать ответ о завершениии одного из них. Как только ответ получен, прекратить исполнение потоков и вызвать в главном потоке игру
              * Попробовать реализовать ожидание перед игрой не через while и IAsyncResult, а через AutoResetEvent ст. 706
              */
+
+            Console.Title = $"Thread Wars";
 
             // thread for timer
             BeginGameEventHandler timerEventHandler = new BeginGameEventHandler(startOnTimer);
@@ -43,7 +46,6 @@ namespace ThreadWar
 
             // execute game in main thread
             StartGame();
-            
 
             // indicate the end of game
             Console.WriteLine("The End");
@@ -105,12 +107,33 @@ namespace ThreadWar
             };
             // add handle for score changes
 
-            Score.GameEndHandle += msg =>
+            Score.GameEndHandle += (won)=>
             {
+                enemyFactory.stop();
+                //ConsoleHelper.endMessage(msg, Console.WindowWidth/2, Console.WindowHeight/2);
+                int width = 30, height = 5;
+                int x = Console.WindowWidth / 2 - width / 2;
+                int y = Console.WindowHeight / 2 - height / 2;
 
-            }
+                ConsoleHelper.drawLines(
+                    new string[] {
+                    "+----------------------------+", // width = 30
+                    "+                            +",
+              won ? "+         You won!!!         +" :
+                    "+        You lose!!!         +",
+                    "+                            +",
+                   $"+         Your score         +",
+                   $"+    hits: {Score.Hit.ToString("00")}, misses: {Score.Miss.ToString("00")}    +",
+                    "+                            +",
+                    "+----------------------------+", // width = 30
+                     }, x, y, width, height
+                );
 
-            while (true)
+
+                isPlaying = false;
+            };
+
+            while (isPlaying)
             {
                 Direction direction = Direction.SelfDefined;
                 switch (Console.ReadKey().Key)

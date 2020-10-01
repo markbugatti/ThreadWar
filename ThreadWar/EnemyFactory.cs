@@ -18,8 +18,9 @@ namespace ThreadWar
         private int randVal = 10;
         private object enemiesLocker = new object();
         private object randValLocker = new object();
-        private static AutoResetEvent waitHandle = new AutoResetEvent(true);
-
+        Timer creater;
+        Timer changer;
+        Timer mover;
         public void start()
         {
             /* create timer to generate enemy and move it
@@ -30,10 +31,10 @@ namespace ThreadWar
             Enemy enemy = new Enemy();
             enemy.OutOfField += removeEnemy;
             Enemies.Add(enemy);
-
+            
 
             // разные таймеры используют один и тот же ресурс Enemies нужно его синхронизировать
-            Timer creater = new Timer((obj) =>
+            creater = new Timer((obj) =>
             {
                 lock (randValLocker)
                 {
@@ -57,9 +58,9 @@ namespace ThreadWar
             }, false, 100, 1000);
 
 
-
+            
             // this timer changes n value for r.Next(n) function in creator callback. Increase appearance probability every 10 seconds
-            Timer changer = new Timer(obj =>
+            changer = new Timer(obj =>
             {
                 if (randVal - 1 > 0)
                 {
@@ -70,7 +71,7 @@ namespace ThreadWar
                 }
             }, false, 0, 10000);
 
-            Timer mover = new Timer((obj) =>
+            mover = new Timer((obj) =>
             {
                 lock (enemiesLocker)
                 {
@@ -83,6 +84,25 @@ namespace ThreadWar
 
 
 
+        }
+
+        public void stop()
+        {
+            lock(enemiesLocker)
+            {
+            creater.Change(Timeout.Infinite, Timeout.Infinite);
+            changer.Change(Timeout.Infinite, Timeout.Infinite);
+            mover.Change(Timeout.Infinite, Timeout.Infinite);
+
+            changer.Dispose();
+            mover.Dispose();
+            creater.Dispose();
+                foreach (var en in Enemies)
+                {
+                    removeEnemy(en);
+                }
+                Enemies = null;
+            }
         }
 
         // x and y represent bullet position
@@ -102,10 +122,14 @@ namespace ThreadWar
         }
         private void removeEnemy(Enemy enemy)
         {
-            enemy.clear();
-            var copy = new List<Enemy>(Enemies);
-            copy.Remove(enemy);
-            Enemies = copy;
+            try
+            {
+                enemy.clear();
+                var copy = new List<Enemy>(Enemies);
+                copy.Remove(enemy);
+                Enemies = copy;
+            }
+            catch { }
         }
 
         private bool areaBusy()

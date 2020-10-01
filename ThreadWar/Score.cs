@@ -13,7 +13,7 @@ namespace ThreadWar
         private static int hit = 0;
         private static int miss = 0;
         public static event Action ScoreChangedHandle;
-        public static event Action<string> GameEndHandle;
+        public static event Action<bool> GameEndHandle;
 
         public static int Hit {
             get => hit;
@@ -24,8 +24,8 @@ namespace ThreadWar
                     hit = value;
                     ScoreChangedHandle();
                     if (value == 30)
-                    {
-                        GameEndHandle("You won!!!");
+                    {             
+                        GameEndHandle(true);
                     }
                 }
                 else
@@ -35,14 +35,14 @@ namespace ThreadWar
         public static int Miss {
             get => miss;
             set {
-                if(miss == 30)
-                {
-                    GameEndHandle("You lose!!!");
-                }
                 if (value > miss)
                 {
                     miss = value;
                     ScoreChangedHandle();
+                    if(miss == 30)
+                    {
+                        GameEndHandle(false);
+                    }
                 }
                 else
                     throw new ArgumentException("New \"miss\" value must be grater then previous");

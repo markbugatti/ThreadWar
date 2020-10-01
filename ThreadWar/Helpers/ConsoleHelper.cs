@@ -83,16 +83,14 @@ namespace ThreadWar.Helpers
                     int speed = Bullet.Speed;
                     uint startI = (uint)bullet.Y;
                     uint startJ = (uint)bullet.X;
-                    // проверить с логикой высоты и шага 
-                    //for (uint i = startI; i < startI - 1; i--)
-                    //{
-                        for (uint j = startJ; j < startJ + width; j++)
-                        {
-                            char ch = getChar(startI-1, j);
-                            if (ch != ' ' && ch != '\0')
-                                 return true;
-                        }
-                    //}
+
+                    for (uint j = startJ; j < startJ + width; j++)
+                    {
+                        char ch = getChar(startI-1, j);
+                        if (ch != ' ' && ch != '\0')
+                                return true;
+                    }
+
                 }
                 return false;
             }
