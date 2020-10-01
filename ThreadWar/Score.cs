@@ -23,7 +23,7 @@ namespace ThreadWar
                 {
                     hit = value;
                     ScoreChangedHandle();
-                    if (value == 30)
+                    if (hit == 30)
                     {             
                         GameEndHandle(true);
                     }
